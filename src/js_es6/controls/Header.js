@@ -4,6 +4,8 @@ import HeaderButton from '../controls/HeaderButton'
 import {
     fnBind
 } from '../utils/utils'
+import DragListener from '../utils/DragListener'
+import DragProxy from './DragProxy'
 
 /**
  * This class represents a header above a Stack ContentItem.
@@ -13,9 +15,9 @@ import {
  */
 const _template = [
         '<div class="lm_header">',
-        '<ul class="lm_tabs"></ul>',
-        '<ul class="lm_controls"></ul>',
-        '<ul class="lm_tabdropdown_list"></ul>',
+        // '<ul class="lm_tabs"></ul>',
+        // '<ul class="lm_controls"></ul>',
+        // '<ul class="lm_tabdropdown_list"></ul>',
         '</div>'
     ].join('')
 
@@ -25,7 +27,7 @@ export default class Header extends EventEmitter {
     constructor(layoutManager, parent) {
 
         super();
-        
+
         this.layoutManager = layoutManager;
         this.element = $(_template);
 
@@ -34,11 +36,46 @@ export default class Header extends EventEmitter {
             this.element.on('click touchstart', fnBind(this._onHeaderClick, this));
         }
 
-        this.tabsContainer = this.element.find('.lm_tabs');
-        this.tabDropdownContainer = this.element.find('.lm_tabdropdown_list');
-        this.tabDropdownContainer.hide();
-        this.controlsContainer = this.element.find('.lm_controls');
+        // this.tabsContainer = this.element.find('.lm_tabs');
+        // this.tabDropdownContainer = this.element.find('.lm_tabdropdown_list');
+        // this.tabDropdownContainer.hide();
+        // this.controlsContainer = this.element.find('.lm_controls');
+
         this.parent = parent;
+
+        //////
+        //////
+        //////
+        //////
+        //////
+        //////
+        //////
+        //////
+        //////
+        	this.dragMeTemplate = '<button class="aaa-drag-me">Drag Me</button>'
+        	this.dragMeElem = $(this.dragMeTemplate)
+
+        	this._dragListener = new DragListener( this.dragMeElem );
+        	this._dragListener.on( 'dragStart', this._onDragStart, this );
+
+        	this.dragCopyTemplate = '<button class="aaa-drag-copy">Drag Copy</button>'
+        	this.dragCopyElem = $(this.dragCopyTemplate)
+
+        	this.removeTemplate = '<button class="aaa-remove">Remove</button>'
+        	this.removeElem = $(this.removeTemplate)
+        	var closeStack = fnBind( this.parent.remove, this.parent );
+        	this.removeElem.on( 'click touchstart', closeStack );
+
+        	this.element.append( this.dragMeElem);
+        	this.element.append( this.dragCopyElem );
+        	this.element.append( this.removeElem );
+
+
+
+
+
+
+
         this.parent.on('resize', this._updateTabSizes, this);
         this.tabs = [];
         this.tabsMarkedForRemoval = [];
@@ -63,6 +100,21 @@ export default class Header extends EventEmitter {
      * @returns {void}
      */
     createTab(contentItem, index) {
+        /////
+		/////
+		/////
+		/////
+		/////
+		/////
+		/////
+		/////
+		/////
+		/////
+		/////
+		// Drag a copy
+		this.layoutManager.createDragSource( this.dragCopyElem, contentItem.config );
+
+
         var tab, i;
 
         //If there's already a tab relating to the
@@ -77,7 +129,7 @@ export default class Header extends EventEmitter {
 
         if (this.tabs.length === 0) {
             this.tabs.push(tab);
-            this.tabsContainer.append(tab.element);
+            // this.tabsContainer.append(tab.element);
             return;
         }
 
@@ -139,7 +191,7 @@ export default class Header extends EventEmitter {
                 this.tabs.splice(i, 1);
                 return;
             }
-        }        
+        }
 
         throw new Error('contentItem is not controlled by this header');
     }
@@ -330,13 +382,26 @@ export default class Header extends EventEmitter {
         }
     }
 
+
+    _onDragStart( x, y ) {
+		new DragProxy(
+			x,
+			y,
+			this._dragListener,
+			this.layoutManager,
+			this.tabs[0].contentItem,
+			// this.parent,
+			null,
+		);
+	}
+
     /**
      * Shows drop down for additional tabs when there are too many to display.
      *
      * @returns {void}
      */
     _showAdditionalTabsDropdown() {
-        this.tabDropdownContainer.show();
+        // this.tabDropdownContainer.show();
     }
 
     /**
@@ -345,7 +410,7 @@ export default class Header extends EventEmitter {
      * @returns {void}
      */
     _hideAdditionalTabsDropdown(e) {
-        this.tabDropdownContainer.hide();
+        // this.tabDropdownContainer.hide();
     }
 
     /**
@@ -388,6 +453,9 @@ export default class Header extends EventEmitter {
         if (this.tabs.length === 0) {
             return;
         }
+
+        //////
+        return
 
         //Show the menu based on function argument
         this.tabDropdownButton.element.toggle(showTabMenu === true);
